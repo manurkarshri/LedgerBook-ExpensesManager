@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#070b14" />
+<title>LedgerBookPro Expense Manager</title>
+
+<style>
+:root {
+  --bg: #070b14;
+  --surface: #151923;
+  --surface-2: #1d2433;
+  --surface-3: #222b3d;
+  --text: #eef2ff;
+  --muted: #a6adbb;
+  --line: #2e374a;
+  --green: #22c55e;
+  --red: #ef4444;
+  --blue: #38bdf8;
+  --yellow: #facc15;
+  --orange: #fb923c;
+  --purple: #a78bfa;
+  --radius: 18px;
+  --shadow: 0 16px 40px rgba(0,0,0,0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+input,
+select,
+textarea,
+label.file-btn {
+  min-height: 48px;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+}
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 18px 14px 90px;
+}
+
+.header {
+  padding: 14px 4px 10px;
+}
+
+.brand {
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: -0.8px;
+}
+
+.dev {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.top-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.icon-btn,
+.primary-btn,
+.secondary-btn,
+.danger-btn,
+.success-btn {
+  border-radius: 14px;
+  padding: 12px 14px;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  border: none;
+  font-weight: 800;
+}
+
+.success-btn {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  border: none;
+  font-weight: 800;
+}
+
+.danger-btn {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  border: none;
+  font-weight: 800;
+}
+
+.secondary-btn {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.icon-wrap {
+  position: relative;
+}
+
+.badge-dot {
+  position: absolute;
+  right: -2px;
+  top: -2px;
+  width: 12px;
+  height: 12px;
+  background: var(--red);
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  display: none;
+}
+
+.badge-dot.show {
+  display: block;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.card-title {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.card-value {
+  font-size: 28px;
+  font-weight: 900;
+  margin-top: 6px;
+}
+
+.green { color: var(--green); }
+.red { color: var(--red); }
+.blue { color: var(--blue); }
+
+.controls {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 12px 13px;
+  outline: none;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 88px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--blue);
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 900;
+  margin: 20px 4px 10px;
+}
+
+.tx-list {
+  display: grid;
+  gap: 10px;
+}
+
+.tx {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 13px;
+  display: grid;
+  gap: 8px;
+}
+
+.tx-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.tx-main {
+  font-weight: 850;
+}
+
+.tx-meta {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.tx-amount {
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.tx-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.small-btn {
+  min-height: 38px;
+  border-radius: 11px;
+  padding: 8px 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 28px 12px;
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+}
+
+/* Fullscreen transaction entry */
+.fullscreen {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--bg);
+  z-index: 50;
+  display: none;
+  overflow-y: auto;
+  padding: env(safe-area-inset-top) 14px env(safe-area-inset-bottom);
+}
+
+.fullscreen.show {
+  display: block;
+}
+
+.form-shell {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 18px 0 28px;
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.form-title {
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.form-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.type-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.toggle-btn {
+  border-radius: 14px;
+  background: var(--surface-2);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  font-weight: 800;
+}
+
+.toggle-btn.active-income {
+  background: rgba(34,197,94,0.18);
+  color: var(--green);
+  border-color: var(--green);
+}
+
+.toggle-btn.active-expense {
+  background: rgba(239,68,68,0.18);
+  color: var(--red);
+  border-color: var(--red);
+}
+
+.preview {
+  max-width: 120px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  display: none;
+}
+
+.file-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.hidden-input {
+  display: none;
+}
+
+.form-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.72);
+  display: none;
+  z-index: 70;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.modal.show {
+  display: block;
+}
+
+.modal-box {
+  max-width: 860px;
+  margin: 20px auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.modal-title {
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.settings-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.banner {
+  display: none;
+  background: rgba(250,204,21,0.12);
+  color: #fde68a;
+  border: 1px solid rgba(250,204,21,0.35);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.banner.show {
+  display: block;
+}
+
+.report-section {
+  margin-top: 18px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.chart-title {
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+
+.chart {
+  display: grid;
+  gap: 12px;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 80px;
+  gap: 10px;
+  align-items: center;
+}
+
+.bar-label {
+  color: var(--muted);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bar-track {
+  height: 28px;
+  background: #0b1020;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.bar-fill {
+  height: 100%;
+  min-width: 4px;
+  border-radius: 999px;
+}
+
+.bar-value {
+  text-align: right;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.pin-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 100;
+  display: none;
+  place-items: center;
+  padding: 20px;
+}
+
+.pin-screen.show {
+  display: grid;
+}
+
+.pin-box {
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+
+.pin-title {
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.pin-sub {
+  color: var(--muted);
+  margin: 6px 0 14px;
+}
+
+.link-btn {
+  background: none;
+  color: var(--blue);
+  padding: 0;
+  min-height: auto;
+  margin-top: 12px;
+}
+
+@media (min-width: 720px) {
+  .cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .controls {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .field.full {
+    grid-column: 1 / -1;
+  }
+}
+
+@media print {
+  body {
+    background: #ffffff;
+    color: #000000;
+  }
+
+  .app,
+  .fullscreen,
+  .pin-screen,
+  .top-actions,
+  .modal-head button,
+  .settings-grid,
+  .banner {
+    display: none !important;
+  }
+
+  .modal {
+    position: static;
+    display: block !important;
+    background: #ffffff;
+    padding: 0;
+  }
+
+  .modal-box {
+    margin: 0;
+    max-width: none;
+    border: none;
+    box-shadow: none;
+    background: #ffffff;
+    color: #000000;
+  }
+
+  .report-section {
+    break-inside: avoid;
+    background: #ffffff;
+    border: 1px solid #999999;
+  }
+
+  .bar-track {
+    border: 1px solid #777777;
+    background: #eeeeee;
+  }
+
+  .bar-label,
+  .bar-value {
+    color: #000000;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="pinScreen" class="pin-screen">
+  <div class="pin-box">
+    <div class="pin-title">LedgerBook</div>
+    <div class="pin-sub">Developed by Shriganesh Manurkar</div>
+
+    <div class="field">
+      <label for="pinInput">Enter 4-digit PIN</label>
+      <input id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••" />
+    </div>
+
+    <button class="primary-btn" style="width:100%;margin-top:12px;" onclick="unlockApp()">Unlock</button>
+    <button class="link-btn" onclick="forgotPin()">Forgot PIN?</button>
+    <div id="pinMsg" class="tx-meta" style="margin-top:10px;color:var(--red);"></div>
+  </div>
+</div>
+
+<div class="app">
+  <header class="header">
+    <div class="brand">LedgerBook</div>
+    <div class="dev">Developed by Shriganesh Manurkar</div>
+
+    <div class="top-actions">
+      <button class="primary-btn" onclick="openTransactionForm()">+ Add Transaction</button>
+      <button class="secondary-btn" onclick="openReports()">Reports</button>
+
+      <div class="icon-wrap">
+        <button class="icon-btn" onclick="openSettings()">⚙</button>
+        <span id="settingsBadge" class="badge-dot"></span>
+      </div>
+    </div>
+  </header>
+
+  <section class="cards">
+    <div class="card">
+      <div class="card-title">Total Income</div>
+      <div id="incomeCard" class="card-value green">₹0</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Total Expense</div>
+      <div id="expenseCard" class="card-value red">₹0</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Net Savings</div>
+      <div id="savingCard" class="card-value blue">₹0</div>
+    </div>
+  </section>
+
+  <section class="controls">
+    <div class="field">
+      <label for="monthFilter">Month</label>
+      <input id="monthFilter" type="month" />
+    </div>
+
+    <div class="field">
+      <label for="typeFilter">Type</label>
+      <select id="typeFilter">
+        <option value="all">All</option>
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="searchBox">Search</label>
+      <input id="searchBox" type="search" placeholder="Search notes/category..." />
+    </div>
+  </section>
+
+  <div class="section-title">Transactions</div>
+  <section id="transactionList" class="tx-list"></section>
+</div>
+
+<!-- Fullscreen Add/Edit -->
+<div id="entryScreen" class="fullscreen">
+  <div class="form-shell">
+    <div class="form-header">
+      <div>
+        <div id="formTitle" class="form-title">Add Transaction</div>
+        <div class="dev">Fast local entry</div>
+      </div>
+      <button class="secondary-btn" onclick="closeTransactionForm()">Close</button>
+    </div>
+
+    <form id="txForm" class="form-grid">
+      <input id="editId" type="hidden" />
+
+      <div class="field full">
+        <label>Entry Type</label>
+        <div class="type-toggle">
+          <button type="button" id="incomeToggle" class="toggle-btn" onclick="setEntryType('income')">Income</button>
+          <button type="button" id="expenseToggle" class="toggle-btn" onclick="setEntryType('expense')">Expense</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="txDate">Date</label>
+        <input id="txDate" type="date" required />
+      </div>
+
+      <div class="field">
+        <label for="amount">Amount</label>
+        <input id="amount" type="number" min="0" step="0.01" placeholder="0.00" required />
+      </div>
+
+      <div class="field">
+        <label for="category">Category</label>
+        <select id="category" required></select>
+      </div>
+
+      <div class="field">
+        <label for="paymentMode">Payment Mode</label>
+        <select id="paymentMode" required></select>
+      </div>
+
+      <div class="field full">
+        <label for="note">Note</label>
+        <textarea id="note" placeholder="Optional note"></textarea>
+      </div>
+
+      <div class="field full">
+        <label>Receipt Photo / Document</label>
+        <label class="file-btn" for="receiptInput">Attach Receipt</label>
+        <input id="receiptInput" class="hidden-input" type="file" accept="image/*,.pdf" />
+        <img id="receiptPreview" class="preview" alt="Receipt preview" />
+      </div>
+
+      <div class="form-actions full">
+        <button type="button" class="secondary-btn" onclick="closeTransactionForm()">Cancel</button>
+        <button type="submit" class="success-btn">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Reports Modal -->
+<div id="reportsModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Reports</div>
+        <div class="dev">Monthly analytics</div>
+      </div>
+      <button class="secondary-btn" onclick="closeModal('reportsModal')">Close</button>
+    </div>
+
+    <button class="primary-btn" onclick="window.print()">Print / Save PDF</button>
+
+    <div class="report-section">
+      <div class="chart-title">Flow Chart: Income vs Expense</div>
+      <div id="flowChart" class="chart"></div>
+    </div>
+
+    <div class="report-section">
+      <div class="chart-title">Top 5 Breakdown: Highest Spending Categories</div>
+      <div id="topChart" class="chart"></div>
+    </div>
+
+    <div class="report-section">
+      <div class="chart-title">Mode Analysis: Spending by Payment Mode</div>
+      <div id="modeChart" class="chart"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div id="settingsModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Settings</div>
+        <div class="dev">Privacy, backup and security</div>
+      </div>
+      <button class="secondary-btn" onclick="closeModal('settingsModal')">Close</button>
+    </div>
+
+    <div id="backupBanner" class="banner">
+      Backup reminder: Your last backup is more than 7 days old.
+    </div>
+
+    <div class="settings-grid">
+      <div class="field">
+        <label for="currencyInput">Currency Symbol</label>
+        <input id="currencyInput" type="text" maxlength="3" />
+      </div>
+
+      <div class="field">
+        <label for="pinSetInput">Set / Change 4-digit PIN</label>
+        <input id="pinSetInput" type="password" inputmode="numeric" maxlength="4" placeholder="Optional" />
+      </div>
+
+      <div id="securityFields">
+        <div class="field">
+          <label for="secQuestion">Security Question</label>
+          <input id="secQuestion" type="text" placeholder="Example: Your first school?" />
+        </div>
+
+        <div class="field">
+          <label for="secAnswer">Security Answer</label>
+          <input id="secAnswer" type="password" placeholder="Answer" />
+        </div>
+      </div>
+
+      <button id="resetSecurityBtn" class="secondary-btn" onclick="resetSecurityCredentials()" style="display:none;">
+        Reset Security Credentials
+      </button>
+
+      <button class="success-btn" onclick="saveSettings()">Save Settings</button>
+
+      <button class="primary-btn" onclick="exportBackup()">Export Backup JSON</button>
+
+      <label class="file-btn" for="importFile">Import Backup JSON</label>
+      <input id="importFile" class="hidden-input" type="file" accept="application/json,.json" />
+
+      <button class="danger-btn" onclick="clearAllData()">Delete All Local Data</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+const DB_NAME = "LedgerBookProDB";
+const DB_VERSION = 1;
+const STORE = "transactions";
+
+const INCOME_CATEGORIES = [
+  "Salary", "Freelance", "Dividends", "Loan", "Interest", "Bonus", "Other"
+];
+
+const EXPENSE_CATEGORIES = [
+  "Grocery", "Dining Out", "Rent/EMI", "Bills/Utilities", "Fuel/Travel",
+  "Shopping", "Health", "Entertainment", "Education", "Investment",
+  "Insurance", "Personal Care", "Maintenance", "Gift", "Other"
+];
+
+const PAYMENT_MODES = [
+  "UPI/Digital", "Cash", "Credit Card", "Debit Card", "Bank Transfer"
+];
+
+let db;
+let entryType = "expense";
+let receiptBase64 = "";
+let allTransactions = [];
+
+const $ = id => document.getElementById(id);
+
+function todayISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function currentMonth() {
+  return new Date().toISOString().slice(0, 7);
+}
+
+function getSettings() {
+  return JSON.parse(localStorage.getItem("ledgerbook_settings") || "{}");
+}
+
+function setSettings(settings) {
+  localStorage.setItem("ledgerbook_settings", JSON.stringify(settings));
+}
+
+function money(value) {
+  const settings = getSettings();
+  const symbol = settings.currency || "₹";
+  return symbol + Number(value || 0).toLocaleString("en-IN", {
+    maximumFractionDigits: 2
+  });
+}
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+
+    req.onupgradeneeded = event => {
+      const database = event.target.result;
+
+      if (!database.objectStoreNames.contains(STORE)) {
+        const store = database.createObjectStore(STORE, {
+          keyPath: "id",
+          autoIncrement: true
+        });
+
+        store.createIndex("date", "date", { unique: false });
+        store.createIndex("type", "type", { unique: false });
+        store.createIndex("category", "category", { unique: false });
+      }
+    };
+
+    req.onsuccess = event => resolve(event.target.result);
+    req.onerror = event => reject(event.target.error);
+  });
+}
+
+function txStore(mode = "readonly") {
+  return db.transaction(STORE, mode).objectStore(STORE);
+}
+
+function getAllTransactions() {
+  return new Promise((resolve, reject) => {
+    const req = txStore().getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function saveTransaction(data) {
+  return new Promise((resolve, reject) => {
+    const req = txStore("readwrite").put(data);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function deleteTransaction(id) {
+  return new Promise((resolve, reject) => {
+    const req = txStore("readwrite").delete(Number(id));
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function clearTransactions() {
+  return new Promise((resolve, reject) => {
+    const req = txStore("readwrite").clear();
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function replaceTransactions(items) {
+  await clearTransactions();
+
+  for (const item of items) {
+    const clean = { ...item };
+    delete clean.id;
+    await saveTransaction(clean);
+  }
+}
+
+function populatePaymentModes() {
+  $("paymentMode").innerHTML = PAYMENT_MODES
+    .map(mode => `<option value="${escapeHtml(mode)}">${escapeHtml(mode)}</option>`)
+    .join("");
+}
+
+function populateCategories() {
+  const list = entryType === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+  $("category").innerHTML = list
+    .map(cat => `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`)
+    .join("");
+}
+
+function setEntryType(type) {
+  entryType = type;
+  $("incomeToggle").className = "toggle-btn" + (type === "income" ? " active-income" : "");
+  $("expenseToggle").className = "toggle-btn" + (type === "expense" ? " active-expense" : "");
+  populateCategories();
+}
+
+function openTransactionForm(tx = null) {
+  $("entryScreen").classList.add("show");
+  $("txForm").reset();
+  $("editId").value = "";
+  receiptBase64 = "";
+  $("receiptPreview").style.display = "none";
+  $("receiptPreview").src = "";
+
+  populatePaymentModes();
+
+  if (tx) {
+    $("formTitle").textContent = "Edit Transaction";
+    $("editId").value = tx.id;
+    setEntryType(tx.type);
+    $("txDate").value = tx.date;
+    $("amount").value = tx.amount;
+    $("category").value = tx.category;
+    $("paymentMode").value = tx.paymentMode;
+    $("note").value = tx.note || "";
+    receiptBase64 = tx.receipt || "";
+
+    if (receiptBase64 && receiptBase64.startsWith("data:image")) {
+      $("receiptPreview").src = receiptBase64;
+      $("receiptPreview").style.display = "block";
+    }
+  } else {
+    $("formTitle").textContent = "Add Transaction";
+    setEntryType("expense");
+    $("txDate").value = todayISO();
+  }
+}
+
+function closeTransactionForm() {
+  $("entryScreen").classList.remove("show");
+}
+
+$("txDate").addEventListener("change", event => {
+  event.target.dataset.committed = event.target.value;
+});
+
+$("receiptInput").addEventListener("change", async event => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  receiptBase64 = await fileToBase64(file);
+
+  if (file.type.startsWith("image/")) {
+    $("receiptPreview").src = receiptBase64;
+    $("receiptPreview").style.display = "block";
+  } else {
+    $("receiptPreview").style.display = "none";
+  }
+});
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+$("txForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const id = $("editId").value ? Number($("editId").value) : undefined;
+
+  const tx = {
+    type: entryType,
+    date: $("txDate").value,
+    amount: Number($("amount").value),
+    category: $("category").value,
+    paymentMode: $("paymentMode").value,
+    note: $("note").value.trim(),
+    receipt: receiptBase64,
+    updatedAt: new Date().toISOString()
+  };
+
+  if (id) tx.id = id;
+  if (!id) tx.createdAt = new Date().toISOString();
+
+  await saveTransaction(tx);
+  closeTransactionForm();
+  await refresh();
+});
+
+async function refresh() {
+  allTransactions = await getAllTransactions();
+  allTransactions.sort((a, b) => String(b.date).localeCompare(String(a.date)));
+
+  renderDashboard();
+  renderTransactions();
+  updateBackupWarning();
+}
+
+function getFilteredTransactions() {
+  const month = $("monthFilter").value || currentMonth();
+  const type = $("typeFilter").value;
+  const search = $("searchBox").value.trim().toLowerCase();
+
+  return allTransactions.filter(tx => {
+    const monthMatch = tx.date && tx.date.startsWith(month);
+    const typeMatch = type === "all" || tx.type === type;
+    const searchText = `${tx.category} ${tx.paymentMode} ${tx.note || ""}`.toLowerCase();
+    const searchMatch = !search || searchText.includes(search);
+    return monthMatch && typeMatch && searchMatch;
+  });
+}
+
+function renderDashboard() {
+  const month = $("monthFilter").value || currentMonth();
+
+  const monthly = allTransactions.filter(tx => tx.date && tx.date.startsWith(month));
+
+  const income = monthly
+    .filter(tx => tx.type === "income")
+    .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+
+  const expense = monthly
+    .filter(tx => tx.type === "expense")
+    .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+
+  $("incomeCard").textContent = money(income);
+  $("expenseCard").textContent = money(expense);
+  $("savingCard").textContent = money(income - expense);
+}
+
+function renderTransactions() {
+  const list = $("transactionList");
+  const filtered = getFilteredTransactions();
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty">No transactions found for selected filters.</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(tx => `
+    <article class="tx">
+      <div class="tx-row">
+        <div>
+          <div class="tx-main">${escapeHtml(tx.category)}</div>
+          <div class="tx-meta">${escapeHtml(tx.date)} • ${escapeHtml(tx.paymentMode)}</div>
+          ${tx.note ? `<div class="tx-meta">${escapeHtml(tx.note)}</div>` : ""}
+        </div>
+
+        <div class="tx-amount ${tx.type === "income" ? "green" : "red"}">
+          ${tx.type === "income" ? "+" : "-"}${money(tx.amount)}
+        </div>
+      </div>
+
+      <div class="tx-actions">
+        <button class="small-btn" onclick="editTx(${tx.id})">Edit</button>
+        <button class="small-btn" onclick="removeTx(${tx.id})">Delete</button>
+        ${tx.receipt ? `<button class="small-btn" onclick="viewReceipt(${tx.id})">Receipt</button>` : ""}
+      </div>
+    </article>
+  `).join("");
+}
+
+function editTx(id) {
+  const tx = allTransactions.find(item => item.id === Number(id));
+  if (tx) openTransactionForm(tx);
+}
+
+async function removeTx(id) {
+  if (!confirm("Delete this transaction?")) return;
+  await deleteTransaction(id);
+  await refresh();
+}
+
+function viewReceipt(id) {
+  const tx = allTransactions.find(item => item.id === Number(id));
+  if (!tx || !tx.receipt) return;
+
+  const win = window.open("");
+  win.document.write(`
+    <title>Receipt</title>
+    <body style="margin:0;background:#070b14;color:white;font-family:sans-serif;">
+      ${
+        tx.receipt.startsWith("data:image")
+          ? `<img src="${tx.receipt}" style="max-width:100%;height:auto;display:block;margin:auto;">`
+          : `<iframe src="${tx.receipt}" style="width:100vw;height:100vh;border:0;"></iframe>`
+      }
+    </body>
+  `);
+}
+
+$("monthFilter").addEventListener("change", refresh);
+$("typeFilter").addEventListener("change", renderTransactions);
+$("searchBox").addEventListener("input", renderTransactions);
+
+function openReports() {
+  renderReports();
+  $("reportsModal").classList.add("show");
+}
+
+function renderReports() {
+  const month = $("monthFilter").value || currentMonth();
+  const monthly = allTransactions.filter(tx => tx.date && tx.date.startsWith(month));
+
+  const income = sumWhere(monthly, tx => tx.type === "income");
+  const expense = sumWhere(monthly, tx => tx.type === "expense");
+
+  renderBarChart("flowChart", [
+    { label: "Income", value: income, color: "var(--green)" },
+    { label: "Expense", value: expense, color: "var(--red)" }
+  ]);
+
+  const expenseTx = monthly.filter(tx => tx.type === "expense");
+
+  renderBarChart(
+    "topChart",
+    topGroups(expenseTx, "category", 5).map(item => ({
+      ...item,
+      color: "var(--orange)"
+    }))
+  );
+
+  renderBarChart(
+    "modeChart",
+    topGroups(expenseTx, "paymentMode", PAYMENT_MODES.length).map(item => ({
+      ...item,
+      color: "var(--purple)"
+    }))
+  );
+}
+
+function sumWhere(items, predicate) {
+  return items
+    .filter(predicate)
+    .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+}
+
+function topGroups(items, key, limit) {
+  const map = {};
+
+  for (const item of items) {
+    const label = item[key] || "Other";
+    map[label] = (map[label] || 0) + Number(item.amount || 0);
+  }
+
+  return Object.entries(map)
+    .map(([label, value]) => ({ label, value }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, limit);
+}
+
+function renderBarChart(containerId, data) {
+  const box = $(containerId);
+
+  if (!data.length || data.every(item => item.value === 0)) {
+    box.innerHTML = `<div class="empty">No data available.</div>`;
+    return;
+  }
+
+  const max = Math.max(...data.map(item => item.value), 1);
+
+  box.innerHTML = data.map(item => {
+    const width = Math.max(2, (item.value / max) * 100);
+
+    return `
+      <div class="bar-row">
+        <div class="bar-label">${escapeHtml(item.label)}</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${width}%;background:${item.color};"></div>
+        </div>
+        <div class="bar-value">${money(item.value)}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function openSettings() {
+  const settings = getSettings();
+
+  $("currencyInput").value = settings.currency || "₹";
+  $("pinSetInput").value = "";
+
+  const hasSecurity = Boolean(settings.securityQuestion && settings.securityAnswer);
+
+  $("securityFields").style.display = hasSecurity ? "none" : "grid";
+  $("resetSecurityBtn").style.display = hasSecurity ? "block" : "none";
+
+  $("secQuestion").value = "";
+  $("secAnswer").value = "";
+
+  updateBackupWarning();
+  $("settingsModal").classList.add("show");
+}
+
+function saveSettings() {
+  const settings = getSettings();
+
+  settings.currency = $("currencyInput").value.trim() || "₹";
+
+  const newPin = $("pinSetInput").value.trim();
+  if (newPin) {
+    if (!/^\d{4}$/.test(newPin)) {
+      alert("PIN must be exactly 4 digits.");
+      return;
+    }
+    settings.pin = newPin;
+  }
+
+  const question = $("secQuestion").value.trim();
+  const answer = $("secAnswer").value.trim();
+
+  if (question && answer) {
+    settings.securityQuestion = question;
+    settings.securityAnswer = answer.toLowerCase();
+  }
+
+  setSettings(settings);
+  alert("Settings saved.");
+  openSettings();
+  refresh();
+}
+
+function resetSecurityCredentials() {
+  if (!confirm("Reset security question and answer?")) return;
+
+  const settings = getSettings();
+  delete settings.securityQuestion;
+  delete settings.securityAnswer;
+  setSettings(settings);
+
+  openSettings();
+}
+
+function updateBackupWarning() {
+  const settings = getSettings();
+  const last = settings.last_backup_timestamp;
+  let show = true;
+
+  if (last) {
+    const diff = Date.now() - new Date(last).getTime();
+    const days = diff / (1000 * 60 * 60 * 24);
+    show = days > 7;
+  }
+
+  $("settingsBadge").classList.toggle("show", show);
+  $("backupBanner").classList.toggle("show", show);
+}
+
+async function exportBackup() {
+  const settings = getSettings();
+  const transactions = await getAllTransactions();
+
+  const exportData = {
+    app: "LedgerBookPro-ExpenseManager",
+    exportedAt: new Date().toISOString(),
+    settings,
+    transactions
+  };
+
+  settings.last_backup_timestamp = new Date().toISOString();
+  setSettings(settings);
+
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+    type: "application/json"
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "ledgerbookpro-backup.json";
+  link.click();
+  URL.revokeObjectURL(url);
+
+  updateBackupWarning();
+}
+
+$("importFile").addEventListener("change", async event => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (!confirm("Importing will overwrite current transactions and settings. Continue?")) {
+    event.target.value = "";
+    return;
+  }
+
+  const text = await file.text();
+  const data = JSON.parse(text);
+
+  if (!Array.isArray(data.transactions)) {
+    alert("Invalid backup file.");
+    return;
+  }
+
+  if (data.settings) setSettings(data.settings);
+  await replaceTransactions(data.transactions);
+
+  alert("Import completed.");
+  closeModal("settingsModal");
+  await refresh();
+});
+
+async function clearAllData() {
+  if (!confirm("Delete all local transactions and settings? This cannot be undone.")) return;
+
+  await clearTransactions();
+  localStorage.removeItem("ledgerbook_settings");
+
+  alert("All local data deleted.");
+  location.reload();
+}
+
+function closeModal(id) {
+  $(id).classList.remove("show");
+}
+
+function unlockApp() {
+  const settings = getSettings();
+  const entered = $("pinInput").value.trim();
+
+  if (entered === settings.pin) {
+    $("pinScreen").classList.remove("show");
+    $("pinMsg").textContent = "";
+  } else {
+    $("pinMsg").textContent = "Incorrect PIN.";
+  }
+}
+
+function forgotPin() {
+  const settings = getSettings();
+
+  if (!settings.securityQuestion || !settings.securityAnswer) {
+    alert("No security question is saved. PIN cannot be recovered.");
+    return;
+  }
+
+  const answer = prompt(settings.securityQuestion);
+
+  if (answer && answer.trim().toLowerCase() === settings.securityAnswer) {
+    alert("Your PIN is: " + settings.pin);
+  } else {
+    alert("Incorrect answer.");
+  }
+}
+
+function checkPinOnStartup() {
+  const settings = getSettings();
+
+  if (settings.pin) {
+    $("pinScreen").classList.add("show");
+  }
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+async function init() {
+  db = await openDB();
+
+  $("monthFilter").value = currentMonth();
+
+  if (!localStorage.getItem("ledgerbook_settings")) {
+    setSettings({
+      currency: "₹",
+      last_backup_timestamp: null
+    });
+  }
+
+  populatePaymentModes();
+  populateCategories();
+  await refresh();
+  checkPinOnStartup();
+}
+
+init().catch(error => {
+  console.error(error);
+  alert("LedgerBook failed to start: " + error.message);
+});
+</script>
+
+</body>
+</html>
