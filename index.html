@@ -357,10 +357,86 @@ textarea:focus {
   position: relative;
 }
 
-.date-wrap input[type="date"] {
+.custom-date-box {
   background: linear-gradient(135deg, rgba(56,189,248,0.10), rgba(167,139,250,0.10)), var(--surface-2);
-  border-color: rgba(56,189,248,0.45);
+  border: 1px solid rgba(56,189,248,0.45);
+  border-radius: 14px;
+  padding: 12px 13px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-weight: 800;
+}
+
+.calendar-panel {
+  margin-top: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 12px;
+  display: none;
+}
+
+.calendar-panel.show {
+  display: block;
+}
+
+.calendar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.calendar-head button {
+  min-height: 36px;
+  width: 40px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+
+.calendar-title {
+  font-weight: 900;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.calendar-dow {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  min-height: auto;
+}
+
+.calendar-day {
+  min-height: 38px;
+  border-radius: 11px;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  font-weight: 750;
+}
+
+.calendar-day.blank {
+  visibility: hidden;
+}
+
+.calendar-day.selected {
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  color: white;
+  border: none;
+}
+
+.calendar-day.today {
+  border-color: var(--yellow);
 }
 
 .recurring-row {
@@ -765,7 +841,19 @@ textarea:focus {
       <div class="field">
         <label for="txDate">Date</label>
         <div class="date-wrap">
-          <input id="txDate" type="date" required />
+          <input id="txDate" type="hidden" required />
+          <button type="button" id="dateDisplay" class="custom-date-box" onclick="toggleCalendar()">
+            <span id="dateDisplayText">Select date</span>
+            <span>📅</span>
+          </button>
+          <div id="calendarPanel" class="calendar-panel">
+            <div class="calendar-head">
+              <button type="button" onclick="moveCalendarMonth(-1)">‹</button>
+              <div id="calendarTitle" class="calendar-title"></div>
+              <button type="button" onclick="moveCalendarMonth(1)">›</button>
+            </div>
+            <div id="calendarGrid" class="calendar-grid"></div>
+          </div>
         </div>
       </div>
 
@@ -953,6 +1041,7 @@ let db;
 let entryType = "expense";
 let receiptBase64 = "";
 let allTransactions = [];
+let calendarCursor = new Date();
 
 const $ = id => document.getElementById(id);
 
@@ -962,6 +1051,82 @@ function todayISO() {
 
 function currentMonth() {
   return new Date().toISOString().slice(0, 7);
+}
+
+function safeDateISO(date) {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function normalizeType(value) {
+  return String(value || "").toLowerCase();
+}
+
+function setTxDate(value) {
+  $("txDate").value = value;
+  const d = new Date(value + "T00:00:00");
+  $("dateDisplayText").textContent = d.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+}
+
+function toggleCalendar() {
+  $("calendarPanel").classList.toggle("show");
+  renderCalendarPicker();
+}
+
+function moveCalendarMonth(offset) {
+  calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() + offset, 1);
+  renderCalendarPicker();
+}
+
+function selectCalendarDate(value) {
+  setTxDate(value);
+  $("calendarPanel").classList.remove("show");
+  calendarCursor = new Date(value + "T00:00:00");
+  renderCalendarPicker();
+}
+
+function renderCalendarPicker() {
+  const grid = $("calendarGrid");
+  if (!grid) return;
+
+  const selected = $("txDate").value || todayISO();
+  const y = calendarCursor.getFullYear();
+  const m = calendarCursor.getMonth();
+
+  $("calendarTitle").textContent = calendarCursor.toLocaleString("en-IN", {
+    month: "long",
+    year: "numeric"
+  });
+
+  const dayNames = ["S", "M", "T", "W", "T", "F", "S"];
+  let html = dayNames.map(day => `<div class="calendar-dow">${day}</div>`).join("");
+
+  const firstDay = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+
+  for (let i = 0; i < firstDay; i++) {
+    html += `<button type="button" class="calendar-day blank"></button>`;
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const value = safeDateISO(new Date(y, m, day));
+    const cls = [
+      "calendar-day",
+      value === selected ? "selected" : "",
+      value === todayISO() ? "today" : ""
+    ].join(" ");
+
+    html += `<button type="button" class="${cls}" onclick="selectCalendarDate('${value}')">${day}</button>`;
+  }
+
+  grid.innerHTML = html;
 }
 
 function getSettings() {
@@ -1081,8 +1246,9 @@ function openTransactionForm(tx = null) {
   if (tx) {
     $("formTitle").textContent = "Edit Transaction";
     $("editId").value = tx.id;
-    setEntryType(tx.type);
-    $("txDate").value = tx.date;
+    setEntryType(normalizeType(tx.type));
+    setTxDate(tx.date);
+    calendarCursor = new Date(tx.date + "T00:00:00");
     $("amount").value = tx.amount;
     $("merchant").value = tx.merchant || "";
     $("category").value = tx.category;
@@ -1098,7 +1264,9 @@ function openTransactionForm(tx = null) {
   } else {
     $("formTitle").textContent = "Add Transaction";
     setEntryType("expense");
-    $("txDate").value = todayISO();
+    setTxDate(todayISO());
+    calendarCursor = new Date();
+    renderCalendarPicker();
     $("recurringMonthly").checked = false;
   }
 }
@@ -1140,7 +1308,7 @@ $("txForm").addEventListener("submit", async event => {
   const id = $("editId").value ? Number($("editId").value) : undefined;
 
   const tx = {
-    type: entryType,
+    type: normalizeType(entryType),
     date: $("txDate").value,
     amount: Number($("amount").value),
     merchant: $("merchant").value.trim(),
@@ -1224,7 +1392,7 @@ function getFilteredTransactions() {
   const search = $("searchBox").value.trim().toLowerCase();
 
   return getVirtualTransactionsForMonth(month).filter(tx => {
-    const typeMatch = type === "all" || tx.type === type;
+    const typeMatch = type === "all" || normalizeType(tx.type) === type;
     const searchText = `${tx.merchant || ""} ${tx.category} ${tx.paymentMode} ${tx.note || ""}`.toLowerCase();
     const searchMatch = !search || searchText.includes(search);
     return typeMatch && searchMatch;
@@ -1237,11 +1405,11 @@ function renderDashboard() {
   const monthly = getVirtualTransactionsForMonth(month);
 
   const income = monthly
-    .filter(tx => tx.type === "income")
+    .filter(tx => normalizeType(tx.type) === "income")
     .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
 
   const expense = monthly
-    .filter(tx => tx.type === "expense")
+    .filter(tx => normalizeType(tx.type) === "expense")
     .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
 
   $("incomeCard").textContent = money(income);
@@ -1270,8 +1438,8 @@ function renderTransactions() {
           ${tx.note ? `<div class="tx-meta">${escapeHtml(tx.note)}</div>` : ""}
         </div>
 
-        <div class="tx-amount ${tx.type === "income" ? "green" : "red"}">
-          ${tx.type === "income" ? "+" : "-"}${money(tx.amount)}
+        <div class="tx-amount ${normalizeType(tx.type) === "income" ? "green" : "red"}">
+          ${normalizeType(tx.type) === "income" ? "+" : "-"}${money(tx.amount)}
         </div>
       </div>
 
@@ -1375,8 +1543,8 @@ function renderReports() {
 
   const reportRows = getTransactionsForRange(range.start, range.end);
 
-  const income = sumWhere(reportRows, tx => tx.type === "income");
-  const expense = sumWhere(reportRows, tx => tx.type === "expense");
+  const income = sumWhere(reportRows, tx => normalizeType(tx.type) === "income");
+  const expense = sumWhere(reportRows, tx => normalizeType(tx.type) === "expense");
 
   renderBarChart("flowChart", [
     { label: "Income", value: income, color: "var(--green)" },
@@ -1384,7 +1552,7 @@ function renderReports() {
     { label: "Savings", value: Math.max(0, income - expense), color: "var(--blue)" }
   ]);
 
-  const expenseTx = reportRows.filter(tx => tx.type === "expense");
+  const expenseTx = reportRows.filter(tx => normalizeType(tx.type) === "expense");
 
   renderBarChart(
     "topChart",
