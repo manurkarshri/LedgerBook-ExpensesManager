@@ -844,7 +844,6 @@ textarea:focus {
           <input id="txDate" type="hidden" required />
           <button type="button" id="dateDisplay" class="custom-date-box" onclick="toggleCalendar()">
             <span id="dateDisplayText">Select date</span>
-            <span>📅</span>
           </button>
           <div id="calendarPanel" class="calendar-panel">
             <div class="calendar-head">
@@ -864,7 +863,7 @@ textarea:focus {
 
       <div class="field full">
         <label for="merchant">Merchant or Source Name</label>
-        <input id="merchant" type="text" placeholder="Example: Salary, Amazon, Petrol Pump" required />
+        <input id="merchant" type="text" placeholder="Example: Salary, Amazon, Petrol Pump" />
       </div>
 
       <div class="field">
@@ -1050,7 +1049,14 @@ function todayISO() {
 }
 
 function currentMonth() {
-  return new Date().toISOString().slice(0, 7);
+  const now = new Date();
+  return monthValueLocal(now);
+}
+
+function monthValueLocal(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  return `${y}-${m}`;
 }
 
 function safeDateISO(date) {
@@ -1375,7 +1381,7 @@ function getTransactionsForRange(startDate, endDate) {
   const cursor = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
 
   while (cursor < endDate) {
-    const monthValue = cursor.toISOString().slice(0, 7);
+    const monthValue = monthValueLocal(cursor);
     rows = rows.concat(getVirtualTransactionsForMonth(monthValue));
     cursor.setMonth(cursor.getMonth() + 1);
   }
